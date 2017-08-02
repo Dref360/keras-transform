@@ -7,7 +7,7 @@ from transform.sequences import RandomRotationTransformer
 
 class TestSequence(Sequence):
     def __getitem__(self, index):
-        return np.arange(5*20*20*3).reshape([5, 20, 20, 3]), np.arange(5*20*20*3).reshape([5, 20, 20, 3])
+        return np.arange(5 * 20 * 20 * 3).reshape([5, 20, 20, 3]), np.arange(5 * 20 * 20 * 3).reshape([5, 20, 20, 3])
 
     def __len__(self):
         return 10
@@ -15,7 +15,8 @@ class TestSequence(Sequence):
 
 class TestTreeSequence(Sequence):
     def __getitem__(self, index):
-        return [np.arange(5*20*20*3).reshape([5, 20, 20, 3]), np.arange(5*12*12*3).reshape([5, 12, 12, 3])], np.arange(5*10*10*3).reshape([5, 10, 10, 3])
+        return [np.arange(5 * 20 * 20 * 3).reshape([5, 20, 20, 3]), np.arange(5 * 12 * 12 * 3).reshape([5, 12, 12, 3])], np.arange(
+            5 * 10 * 10 * 3).reshape([5, 10, 10, 3])
 
     def __len__(self):
         return 10

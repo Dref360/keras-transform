@@ -13,8 +13,8 @@ def handle_mask(mask, tree):
     return mask
 
 
-def apply_fun(tree, fun, mask,**kwargs):
+def apply_fun(tree, fun, mask, **kwargs):
     if not isinstance(tree, (list, tuple)):
-        return fun(tree,**kwargs) if mask else tree
+        return fun(tree, **kwargs) if mask else tree
     else:
-        return [apply_fun(tr,fun,ma,**kwargs) if ma else tr for tr, ma in zip(tree, handle_mask(mask, tree))]
+        return [apply_fun(tr, fun, ma, **kwargs) if ma else tr for tr, ma in zip(tree, handle_mask(mask, tree))]
