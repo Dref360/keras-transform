@@ -1,6 +1,7 @@
 import keras.backend as K
 import numpy as np
-from keras.preprocessing.image import random_rotation
+from transform.utils.transformations import random_rotation
+from transform.utils import apply_fun
 from keras.utils import Sequence
 
 
@@ -10,9 +11,11 @@ class BaseSequenceTransformer(Sequence):
     # Arguments
         sequence: Sequence object to iterate over.
         data_format: `'channels_last'`, `'channels_first'` or None
+        mask: A tree-like boolean structure to know which data to transform.
     """
-    def __init__(self, sequence, data_format=None):
+    def __init__(self, sequence, data_format=None, mask=True):
         self.sequence = sequence
+        self.mask = mask
         if data_format is None:
             data_format = K.image_data_format()
         if data_format not in {'channels_last', 'channels_first'}:
@@ -43,18 +46,16 @@ class RandomRotationTransformer(BaseSequenceTransformer):
         sequence: Sequence object to iterate over.
         rg: Range of rotation
     """
-    def __init__(self, sequence, rg):
-        super().__init__(sequence)
+    def __init__(self, sequence, rg,mask=(True,False)):
+        super().__init__(sequence,mask=mask)
         self.rg = rg
 
-    def _rotate_batch(self, x_):
-        return map(lambda l: random_rotation(l, rg=self.rg, row_axis=self.row_axis, col_axis=self.col_axis,
-                                             channel_axis=self.channel_axis), x_)
+    def _rotate_batch(self, x_, theta=None):
+        return np.asarray(list(map(lambda l: random_rotation(l, rg=self.rg, row_axis=self.row_axis, col_axis=self.col_axis,
+                                             channel_axis=self.channel_axis-1, theta=theta), x_)))
 
     def __getitem__(self, index):
-        x, y = self.sequence[index]
+        batch = self.sequence[index]
+        theta = np.pi / 180 * np.random.uniform(-self.rg, self.rg)
 
-        if isinstance(x, (list, tuple)):
-            return np.array([self._rotate_batch(x_) for x_ in x]), y
-        else:
-            return self._rotate_batch(x), y
+        return apply_fun(batch,self._rotate_batch,self.mask,theta=theta)
