@@ -2,7 +2,7 @@ import keras.backend as K
 import numpy as np
 from keras.utils import Sequence
 
-from transform.utils import apply_fun, get_batch_shape
+from transform.utils import apply_fun, get_batch_size
 from transform.utils.transformations import (random_rotation, random_shift, random_zoom, random_channel_shift,
                                              random_shear, flip_horizontal, flip_vertical)
 
@@ -60,7 +60,7 @@ class BaseSequenceTransformer(Sequence):
         batch = self.sequence[index]
         if self.batch_size is None:
             # The first batch should be the maximum batch_size i.e. not the last.
-            self.batch_size = get_batch_shape(batch)[0]
+            self.batch_size = get_batch_size(batch)
 
         args = self.get_args()
         for arg in args:
