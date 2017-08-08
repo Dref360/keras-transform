@@ -85,7 +85,7 @@ def inner_transformer(transformer_cls, **kwargs):
     assert all([np.any(np.not_equal(t0, t1)) for t0, t1 in zip(transformer[0][0], transformer[1][0])]) and np.not_equal(
         transformer[0][1], transformer[1][1]).any()
 
-    # Should rotate the same way for X and y
+    # Should transform the same way for X and y
     transformer = transformer_cls(TestSequence(), mask=[True, True], **kwargs)
     assert (np.equal(*transformer[0])).all()
 

@@ -31,6 +31,7 @@ def random_rotation(x, rg, row_axis=1, col_axis=2, channel_axis=0,
             (one of `{'constant', 'nearest', 'reflect', 'wrap'}`).
         cval: Value used for points outside the boundaries
             of the input if `mode='constant'`.
+        theta: Value to disable randomness or None.
 
     # Returns
         Rotated Numpy image tensor.
@@ -62,6 +63,8 @@ def random_shift(x, wrg, hrg, row_axis=1, col_axis=2, channel_axis=0,
             (one of `{'constant', 'nearest', 'reflect', 'wrap'}`).
         cval: Value used for points outside the boundaries
             of the input if `mode='constant'`.
+        tx : Value to disable randomness in X or None.
+        ty : Value to disable randomness in Y or None.
 
     # Returns
         Shifted Numpy image tensor.
@@ -97,6 +100,7 @@ def random_shear(x, intensity, row_axis=1, col_axis=2, channel_axis=0,
             (one of `{'constant', 'nearest', 'reflect', 'wrap'}`).
         cval: Value used for points outside the boundaries
             of the input if `mode='constant'`.
+        known_intensity: Value to disable randomness or None.
 
     # Returns
         Sheared Numpy image tensor.
@@ -127,6 +131,7 @@ def random_zoom(x, zoom_range, row_axis=1, col_axis=2, channel_axis=0,
             (one of `{'constant', 'nearest', 'reflect', 'wrap'}`).
         cval: Value used for points outside the boundaries
             of the input if `mode='constant'`.
+        z_known: Value to disable randomness or None.
 
     # Returns
         Zoomed Numpy image tensor.
