@@ -15,10 +15,15 @@ For example, `mask=[[True,False],False]` would augment the first input but not t
 from transform.sequences import SequentialTransformer
 from transform.sequences import RandomZoomTransformer, RandomVerticalFlipTransformer
 
-seq = ... # A keras.utils.Sequence object that returns (X,y)
+seq = ... # A keras.utils.Sequence object that returns a tuple (X,y)
 model = ... # A keras Model
 
-sequence = SequentialTransformer([RandomZoomTransformer(zoom_range=(0.8,1.2)), RandomVerticalFlipTransformer()])
+"""
+A transformer transforms the input. Most data augmentation functions are implemented in transform.sequences.
+We can chain transformers together using the SequentialTransformer that takes a list of transformers.
+"""
+sequence = SequentialTransformer([RandomZoomTransformer(zoom_range=(0.8,1.2)),
+                                  RandomVerticalFlipTransformer()])
 
 # To augment X but not y
 augmented_sequence = sequence(seq,mask=[True,False])
