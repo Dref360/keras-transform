@@ -6,7 +6,7 @@ class SequentialTransformer():
         """
         self.transformers = transformers
 
-    def __call__(self, seq, mask=(True,False)):
+    def __call__(self, seq, mask=(True, False)):
         for transformer in self.transformers:
-            seq = transformer(seq,mask)
+            seq = transformer(seq, mask)
         return seq
