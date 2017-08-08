@@ -27,13 +27,44 @@ class TestTreeSequence(Sequence):
         return 10
 
 
-def sequential_test():
+def inner_transformer(transformer_obj, **kwargs):
+    transformer = transformer_obj(TestSequence())
+    # Assert that X changes between 2 calls and Y does not.
+    assert np.any(np.not_equal(transformer[0][0], transformer[1][0])) and np.all(
+        np.equal(transformer[0][1], transformer[1][1]))
+
+    transformer = transformer_obj(TestTreeSequence())
+
+    assert all([np.any(np.not_equal(t0, t1)) for t0, t1 in zip(transformer[0][0], transformer[1][0])]) and all(
+        [np.all(np.equal(t0, t1)) for t0, t1 in zip(transformer[0][1], transformer[1][1])])
+
+    # Test Mask
+    transformer = transformer_obj(TestTreeSequence(), mask=False)
+
+    assert all([np.any(np.equal(t0, t1)) for t0, t1 in zip(transformer[0][0], transformer[1][0])]) and np.equal(
+        transformer[0][1], transformer[1][1]).all()
+
+    transformer = transformer_obj(TestTreeSequence(), mask=[True, True])
+
+    assert all(
+        [np.any(np.not_equal(t0, t1)) for t0, t1 in zip(transformer[0][0], transformer[1][0])]) and np.not_equal(
+        transformer[0][1], transformer[1][1]).any()
+
+    # Should transform the same way for X and y
+    transformer = transformer_obj(TestSequence(), mask=[True, True])
+    assert (np.equal(*transformer[0])).all()
+
+    # Common case where we augment X but not y
+    transformer = transformer_obj(TestSequence(), mask=[True, False])
+    assert (np.not_equal(*transformer[0])).any()
+
+
+def test_sequential():
     # TODO need better test.
     sequential = SequentialTransformer([RandomZoomTransformer((0.8, 1.2)),
                                         RandomVerticalFlipTransformer()])
 
-    _ = sequential(TestSequence())[0]
-    _ = sequential(TestTreeSequence())[0]
+    inner_transformer(sequential)
 
 
 if __name__ == '__main__':

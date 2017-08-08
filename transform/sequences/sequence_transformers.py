@@ -19,9 +19,9 @@ class BaseSequenceTransformer(Sequence):
     def on_epoch_end(self):
         pass
 
-    def __init__(self, data_format=None, mask=True):
+    def __init__(self, data_format=None):
         self.sequence = None
-        self.mask = mask
+        self.mask = None
         self.batch_size = None  # We do not know yet
         self.transformation = id
         if data_format is None:
@@ -43,7 +43,8 @@ class BaseSequenceTransformer(Sequence):
         self.common_args = {'row_axis': self.row_axis, 'col_axis': self.col_axis,
                             'channel_axis': self.channel_axis - 1}
 
-    def __call__(self, seq):
+    def __call__(self, seq, mask=(True, False)):
+        self.mask = mask
         self.sequence = seq
         return self
 
@@ -86,8 +87,8 @@ class RandomRotationTransformer(BaseSequenceTransformer):
         rg: Range of rotation
     """
 
-    def __init__(self, rg, mask=(True, False)):
-        super().__init__(mask=mask)
+    def __init__(self, rg):
+        super().__init__()
         self.rg = rg
         self.transformation = random_rotation
 
@@ -105,8 +106,8 @@ class RandomShiftTransformer(BaseSequenceTransformer):
         hrg: Height shift range, as a float fraction of the height.
     """
 
-    def __init__(self, wrg, hrg, mask=(True, False)):
-        super().__init__(mask=mask)
+    def __init__(self, wrg, hrg):
+        super().__init__()
         self.wrg = wrg
         self.hrg = hrg
         self.transformation = random_shift
@@ -124,8 +125,8 @@ class RandomZoomTransformer(BaseSequenceTransformer):
         zoom_range: Tuple of floats; zoom range for width and height.
     """
 
-    def __init__(self, zoom_range, mask=(True, False)):
-        super().__init__(mask=mask)
+    def __init__(self, zoom_range, ):
+        super().__init__()
         self.zoom_range = zoom_range
         self.transformation = random_zoom
 
@@ -145,8 +146,8 @@ class RandomChannelShiftTransformer(BaseSequenceTransformer):
         intensity: float, intensity range
     """
 
-    def __init__(self, intensity, mask=(True, False)):
-        super().__init__(mask=mask)
+    def __init__(self, intensity, ):
+        super().__init__()
         self.intensity = intensity
         self.transformation = random_channel_shift
         self.common_args = {'channel_axis': self.channel_axis - 1}
@@ -164,8 +165,8 @@ class RandomShearTransformer(BaseSequenceTransformer):
         zoom_range: Tuple of floats; zoom range for width and height.
     """
 
-    def __init__(self, intensity, mask=(True, False)):
-        super().__init__(mask=mask)
+    def __init__(self, intensity, ):
+        super().__init__()
         self.intensity = intensity
         self.transformation = random_shear
 
@@ -181,8 +182,8 @@ class RandomHorizontalFlipTransformer(BaseSequenceTransformer):
         sequence: Sequence object to iterate over
     """
 
-    def __init__(self, mask=(True, False)):
-        super().__init__(mask=mask)
+    def __init__(self, ):
+        super().__init__()
         self.transformation = flip_horizontal
         # The -1 is important here!
         self.common_args = {'col_axis': self.col_axis - 1}
@@ -199,8 +200,8 @@ class RandomVerticalFlipTransformer(BaseSequenceTransformer):
         sequence: Sequence object to iterate over
     """
 
-    def __init__(self, mask=(True, False)):
-        super().__init__(mask=mask)
+    def __init__(self, ):
+        super().__init__()
         self.transformation = flip_vertical
         # The -1 is important here!
         self.common_args = {'row_axis': self.row_axis - 1}

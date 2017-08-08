@@ -31,10 +31,10 @@ paths = glob('/data/images_folder/*.jpg')
 seq = SimpleSequence(paths)
 
 """Applying the SAME transformation to X and y is done by specifying a mask."""
-transformer = RandomRotationTransformer(10, mask=[True, True])(seq)
-transformer = RandomHorizontalFlipTransformer(mask=[True, True])(transformer)
-transformer = RandomShearTransformer(intensity=0.5, mask=[True, True])(transformer)
-transformer = RandomZoomTransformer(zoom_range=(0.8, 1.2), mask=[True, True])(transformer)
+transformer = RandomRotationTransformer(10)(seq, mask=[True, True])
+transformer = RandomHorizontalFlipTransformer()(transformer, mask=[True, True])
+transformer = RandomShearTransformer(intensity=0.5)(transformer, mask=[True, True])
+transformer = RandomZoomTransformer(zoom_range=(0.8, 1.2))(transformer, mask=[True, True])
 
 # 200,400
 vid = cv2.VideoWriter(filename='/home/local/USHERBROOKE/braf3002/Documents/output.avi', fourcc=cv2.VideoWriter_fourcc(*'MJPG'), fps=10, frameSize=(400, 200),

@@ -80,22 +80,22 @@ def inner_transformer(transformer_cls, **kwargs):
         [np.all(np.equal(t0, t1)) for t0, t1 in zip(transformer[0][1], transformer[1][1])])
 
     # Test Mask
-    transformer = transformer_cls(mask=False, **kwargs)(TestTreeSequence())
+    transformer = transformer_cls(**kwargs)(TestTreeSequence(),mask=False)
 
     assert all([np.any(np.equal(t0, t1)) for t0, t1 in zip(transformer[0][0], transformer[1][0])]) and np.equal(
         transformer[0][1], transformer[1][1]).all()
 
-    transformer = transformer_cls(mask=[True, True], **kwargs)(TestTreeSequence())
+    transformer = transformer_cls(**kwargs)(TestTreeSequence(),mask=[True, True])
 
     assert all([np.any(np.not_equal(t0, t1)) for t0, t1 in zip(transformer[0][0], transformer[1][0])]) and np.not_equal(
         transformer[0][1], transformer[1][1]).any()
 
     # Should transform the same way for X and y
-    transformer = transformer_cls(mask=[True, True], **kwargs)(TestSequence())
+    transformer = transformer_cls(**kwargs)(TestSequence(),mask=[True, True])
     assert (np.equal(*transformer[0])).all()
 
     # Common case where we augment X but not y
-    transformer = transformer_cls(mask=[True, False], **kwargs)(TestSequence())
+    transformer = transformer_cls(**kwargs)(TestSequence(), mask=[True, False])
     assert (np.not_equal(*transformer[0])).any()
 
 
