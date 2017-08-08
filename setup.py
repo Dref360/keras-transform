@@ -2,7 +2,7 @@ from setuptools import setup
 from setuptools import find_packages
 
 setup(name='keras-transform',
-      version='0.0.1',
+      version='0.1.0',
       description='Library for data augmentation',
       author='Frederic Branchaud-Charron',
       author_email='frederic.branchaud-charron@usherbrooke.ca',

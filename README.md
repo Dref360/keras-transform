@@ -16,15 +16,4 @@ Any PR that adds a new feature needs to be tested.
 Here's an example where X is an image and the groundtruth is the grayscale. The code can be found [here](examples/make_gifs.py)
 
 
-# TODO
-- [x] Handle masked augmentation
-- [x] Random rotation
-- [x] CircleCI
-- [x] Random zoom
-- [x] Random shift
-- [x] Random channel shift
-- [x] Random shear
-- [x] Random flip
-- [ ] Functional API utils
-
 
