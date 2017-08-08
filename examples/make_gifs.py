@@ -37,7 +37,7 @@ transformer = RandomShearTransformer(intensity=0.5)(transformer, mask=[True, Tru
 transformer = RandomZoomTransformer(zoom_range=(0.8, 1.2))(transformer, mask=[True, True])
 
 # 200,400
-vid = cv2.VideoWriter(filename='/home/local/USHERBROOKE/braf3002/Documents/output.avi', fourcc=cv2.VideoWriter_fourcc(*'MJPG'), fps=10, frameSize=(400, 200),
+vid = cv2.VideoWriter(filename='/data/output.avi', fourcc=cv2.VideoWriter_fourcc(*'MJPG'), fps=5, frameSize=(400, 200),
                       isColor=True)
 
 try:
