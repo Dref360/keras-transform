@@ -6,6 +6,7 @@ from transform.utils import get_value, handle_mask, apply_fun
 
 
 def is_same(arr1, arr2):
+    """Recursively check if 2 lists of array are equal."""
     if isinstance(arr1, (list, tuple)):
         return all([is_same(a1, a2) for a1, a2 in zip(arr1, arr2)])
     return np.allclose(arr1, arr2)

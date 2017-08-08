@@ -47,7 +47,7 @@ def random_rotation(x, rg, row_axis=1, col_axis=2, channel_axis=0,
 
 
 def random_shift(x, wrg, hrg, row_axis=1, col_axis=2, channel_axis=0,
-                 fill_mode='nearest', cval=0.):
+                 fill_mode='nearest', cval=0., tx=None, ty=None):
     """Performs a random spatial shift of a Numpy image tensor.
 
     # Arguments
@@ -67,8 +67,12 @@ def random_shift(x, wrg, hrg, row_axis=1, col_axis=2, channel_axis=0,
         Shifted Numpy image tensor.
     """
     h, w = x.shape[row_axis], x.shape[col_axis]
-    tx = np.random.uniform(-hrg, hrg) * h
-    ty = np.random.uniform(-wrg, wrg) * w
+    tx = np.random.uniform(-hrg, hrg) * h if tx is None else tx
+    ty = np.random.uniform(-wrg, wrg) * w if ty is None else ty
+
+    tx *= h
+    ty *= w
+
     translation_matrix = np.array([[1, 0, tx],
                                    [0, 1, ty],
                                    [0, 0, 1]])
