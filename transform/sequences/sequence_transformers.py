@@ -19,8 +19,8 @@ class BaseSequenceTransformer(Sequence):
     def on_epoch_end(self):
         pass
 
-    def __init__(self, sequence, data_format=None, mask=True):
-        self.sequence = sequence
+    def __init__(self, data_format=None, mask=True):
+        self.sequence = None
         self.mask = mask
         self.batch_size = None  # We do not know yet
         self.transformation = id
@@ -43,6 +43,10 @@ class BaseSequenceTransformer(Sequence):
         self.common_args = {'row_axis': self.row_axis, 'col_axis': self.col_axis,
                             'channel_axis': self.channel_axis - 1}
 
+    def __call__(self, seq):
+        self.sequence = seq
+        return self
+
     def apply_transformation(self, x_, transformation, args):
         return np.asarray(
             list(map(lambda args: transformation(args[0], **args[1]),
@@ -57,6 +61,8 @@ class BaseSequenceTransformer(Sequence):
         raise NotImplementedError
 
     def __getitem__(self, index):
+        assert self.sequence, "This transformer {} has not been called with a Sequence object".format(
+            self.__class__.__name__)
         batch = self.sequence[index]
         if self.batch_size is None:
             # The first batch should be the maximum batch_size i.e. not the last.
@@ -80,8 +86,8 @@ class RandomRotationTransformer(BaseSequenceTransformer):
         rg: Range of rotation
     """
 
-    def __init__(self, sequence, rg, mask=(True, False)):
-        super().__init__(sequence, mask=mask)
+    def __init__(self, rg, mask=(True, False)):
+        super().__init__(mask=mask)
         self.rg = rg
         self.transformation = random_rotation
 
@@ -99,8 +105,8 @@ class RandomShiftTransformer(BaseSequenceTransformer):
         hrg: Height shift range, as a float fraction of the height.
     """
 
-    def __init__(self, sequence, wrg, hrg, mask=(True, False)):
-        super().__init__(sequence, mask=mask)
+    def __init__(self, wrg, hrg, mask=(True, False)):
+        super().__init__(mask=mask)
         self.wrg = wrg
         self.hrg = hrg
         self.transformation = random_shift
@@ -118,8 +124,8 @@ class RandomZoomTransformer(BaseSequenceTransformer):
         zoom_range: Tuple of floats; zoom range for width and height.
     """
 
-    def __init__(self, sequence, zoom_range, mask=(True, False)):
-        super().__init__(sequence, mask=mask)
+    def __init__(self, zoom_range, mask=(True, False)):
+        super().__init__(mask=mask)
         self.zoom_range = zoom_range
         self.transformation = random_zoom
 
@@ -139,8 +145,8 @@ class RandomChannelShiftTransformer(BaseSequenceTransformer):
         intensity: float, intensity range
     """
 
-    def __init__(self, sequence, intensity, mask=(True, False)):
-        super().__init__(sequence, mask=mask)
+    def __init__(self, intensity, mask=(True, False)):
+        super().__init__(mask=mask)
         self.intensity = intensity
         self.transformation = random_channel_shift
         self.common_args = {'channel_axis': self.channel_axis - 1}
@@ -158,8 +164,8 @@ class RandomShearTransformer(BaseSequenceTransformer):
         zoom_range: Tuple of floats; zoom range for width and height.
     """
 
-    def __init__(self, sequence, intensity, mask=(True, False)):
-        super().__init__(sequence, mask=mask)
+    def __init__(self, intensity, mask=(True, False)):
+        super().__init__(mask=mask)
         self.intensity = intensity
         self.transformation = random_shear
 
@@ -175,10 +181,11 @@ class RandomHorizontalFlipTransformer(BaseSequenceTransformer):
         sequence: Sequence object to iterate over
     """
 
-    def __init__(self, sequence, mask=(True, False)):
-        super().__init__(sequence, mask=mask)
+    def __init__(self, mask=(True, False)):
+        super().__init__(mask=mask)
         self.transformation = flip_horizontal
-        self.common_args = {'col_axis': self.col_axis}
+        # The -1 is important here!
+        self.common_args = {'col_axis': self.col_axis - 1}
 
     def get_args(self):
         return [{'value': np.random.random()} for
@@ -192,10 +199,11 @@ class RandomVerticalFlipTransformer(BaseSequenceTransformer):
         sequence: Sequence object to iterate over
     """
 
-    def __init__(self, sequence, mask=(True, False)):
-        super().__init__(sequence, mask=mask)
+    def __init__(self, mask=(True, False)):
+        super().__init__(mask=mask)
         self.transformation = flip_vertical
-        self.common_args = {'row_axis': self.row_axis}
+        # The -1 is important here!
+        self.common_args = {'row_axis': self.row_axis - 1}
 
     def get_args(self):
         return [{'value': np.random.random()} for

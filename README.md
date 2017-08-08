@@ -11,6 +11,11 @@ Anyone can contribute by submitting a PR, but remember that the code is in an ea
 Also, a lot of documentation needs to be done.
 Any PR that adds a new feature needs to be tested.
 
+Here's an example where X is an image and the groundtruth is the grayscale. The code can be found [here](examples/make_gifs.py)
+
+![alt-text][examples/example.gif]
+
+
 # TODO
 - [x] Handle masked augmentation
 - [x] Random rotation
@@ -20,6 +25,6 @@ Any PR that adds a new feature needs to be tested.
 - [x] Random channel shift
 - [x] Random shear
 - [x] Random flip
-- [ ] Functional API
+- [ ] Functional API utils
 
 

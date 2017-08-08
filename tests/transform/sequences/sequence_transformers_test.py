@@ -62,35 +62,40 @@ def test_random_flip():
     inner_transformer(RandomVerticalFlipTransformer)
 
 
+def test_assert():
+    with pytest.raises(AssertionError):
+        _ = RandomHorizontalFlipTransformer()[0]
+
+
 def inner_transformer(transformer_cls, **kwargs):
 
-    transformer = transformer_cls(TestSequence(), **kwargs)
+    transformer = transformer_cls(**kwargs)(TestSequence())
     # Assert that X changes between 2 calls and Y does not.
     assert np.any(np.not_equal(transformer[0][0], transformer[1][0])) and np.all(
         np.equal(transformer[0][1], transformer[1][1]))
 
-    transformer = transformer_cls(TestTreeSequence(), **kwargs)
+    transformer = transformer_cls(**kwargs)(TestTreeSequence())
 
     assert all([np.any(np.not_equal(t0, t1)) for t0, t1 in zip(transformer[0][0], transformer[1][0])]) and all(
         [np.all(np.equal(t0, t1)) for t0, t1 in zip(transformer[0][1], transformer[1][1])])
 
     # Test Mask
-    transformer = transformer_cls(TestTreeSequence(), mask=False, **kwargs)
+    transformer = transformer_cls(mask=False, **kwargs)(TestTreeSequence())
 
     assert all([np.any(np.equal(t0, t1)) for t0, t1 in zip(transformer[0][0], transformer[1][0])]) and np.equal(
         transformer[0][1], transformer[1][1]).all()
 
-    transformer = transformer_cls(TestTreeSequence(), mask=[True, True], **kwargs)
+    transformer = transformer_cls(mask=[True, True], **kwargs)(TestTreeSequence())
 
     assert all([np.any(np.not_equal(t0, t1)) for t0, t1 in zip(transformer[0][0], transformer[1][0])]) and np.not_equal(
         transformer[0][1], transformer[1][1]).any()
 
     # Should transform the same way for X and y
-    transformer = transformer_cls(TestSequence(), mask=[True, True], **kwargs)
+    transformer = transformer_cls(mask=[True, True], **kwargs)(TestSequence())
     assert (np.equal(*transformer[0])).all()
 
     # Common case where we augment X but not y
-    transformer = transformer_cls(TestSequence(), mask=[True, False], **kwargs)
+    transformer = transformer_cls(mask=[True, False], **kwargs)(TestSequence())
     assert (np.not_equal(*transformer[0])).any()
 
 
