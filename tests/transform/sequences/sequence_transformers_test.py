@@ -2,7 +2,10 @@ import numpy as np
 import pytest
 from keras.utils import Sequence
 
-from transform.sequences import RandomRotationTransformer, RandomShiftTransformer
+from transform.sequences import (RandomRotationTransformer, RandomShiftTransformer, RandomZoomTransformer,
+                                 RandomChannelShiftTransformer, RandomShearTransformer, RandomHorizontalFlipTransformer,
+                                 RandomVerticalFlipTransformer
+                                 )
 
 
 class TestSequence(Sequence):
@@ -28,16 +31,41 @@ class TestTreeSequence(Sequence):
 
 
 def test_random_rot():
+    np.random.seed(1337)
     inner_transformer(RandomRotationTransformer, rg=25)
 
 
 def test_random_shift():
+    np.random.seed(1337)
     inner_transformer(RandomShiftTransformer, wrg=0.5, hrg=0.5)
 
 
-def inner_transformer(transformer_cls, **kwargs):
+def test_random_zoom():
     np.random.seed(1337)
+    inner_transformer(RandomZoomTransformer, zoom_range=(.2, 1.5))
+
+
+def test_random_intensity_shift():
+    np.random.seed(1337)
+    inner_transformer(RandomChannelShiftTransformer, intensity=10)
+
+
+def test_random_shear():
+    np.random.seed(1337)
+    inner_transformer(RandomShearTransformer, intensity=10)
+
+
+def test_random_flip():
+    np.random.seed(1337)
+    # This SHOULD work since batch_size is 5 and we have 50% chances of doing a flip.
+    inner_transformer(RandomHorizontalFlipTransformer)
+    inner_transformer(RandomVerticalFlipTransformer)
+
+
+def inner_transformer(transformer_cls, **kwargs):
+
     transformer = transformer_cls(TestSequence(), **kwargs)
+    # Assert that X changes between 2 calls and Y does not.
     assert np.any(np.not_equal(transformer[0][0], transformer[1][0])) and np.all(
         np.equal(transformer[0][1], transformer[1][1]))
 

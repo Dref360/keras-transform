@@ -8,7 +8,7 @@ from __future__ import absolute_import
 from __future__ import print_function
 
 import numpy as np
-from keras.preprocessing.image import apply_transform
+from keras.preprocessing.image import apply_transform, flip_axis
 
 try:
     from PIL import Image as pil_image
@@ -83,7 +83,7 @@ def random_shift(x, wrg, hrg, row_axis=1, col_axis=2, channel_axis=0,
 
 
 def random_shear(x, intensity, row_axis=1, col_axis=2, channel_axis=0,
-                 fill_mode='nearest', cval=0.):
+                 fill_mode='nearest', cval=0., known_intensity=None):
     """Performs a random spatial shear of a Numpy image tensor.
 
     # Arguments
@@ -101,7 +101,7 @@ def random_shear(x, intensity, row_axis=1, col_axis=2, channel_axis=0,
     # Returns
         Sheared Numpy image tensor.
     """
-    shear = np.random.uniform(-intensity, intensity)
+    shear = np.random.uniform(-intensity, intensity) if known_intensity is None else known_intensity
     shear_matrix = np.array([[1, -np.sin(shear), 0],
                              [0, np.cos(shear), 0],
                              [0, 0, 1]])
@@ -113,7 +113,7 @@ def random_shear(x, intensity, row_axis=1, col_axis=2, channel_axis=0,
 
 
 def random_zoom(x, zoom_range, row_axis=1, col_axis=2, channel_axis=0,
-                fill_mode='nearest', cval=0.):
+                fill_mode='nearest', cval=0., z_known=None):
     """Performs a random spatial zoom of a Numpy image tensor.
 
     # Arguments
@@ -134,14 +134,16 @@ def random_zoom(x, zoom_range, row_axis=1, col_axis=2, channel_axis=0,
     # Raises
         ValueError: if `zoom_range` isn't a tuple.
     """
-    if len(zoom_range) != 2:
-        raise ValueError('`zoom_range` should be a tuple or list of two floats. '
-                         'Received arg: ', zoom_range)
-
-    if zoom_range[0] == 1 and zoom_range[1] == 1:
-        zx, zy = 1, 1
+    if z_known is None:
+        if len(zoom_range) != 2:
+            raise ValueError('`zoom_range` should be a tuple or list of two floats. '
+                             'Received arg: ', zoom_range)
+        if zoom_range[0] == 1 and zoom_range[1] == 1:
+            zx, zy = 1, 1
+        else:
+            zx, zy = np.random.uniform(zoom_range[0], zoom_range[1], 2)
     else:
-        zx, zy = np.random.uniform(zoom_range[0], zoom_range[1], 2)
+        zx, zy = z_known
     zoom_matrix = np.array([[zx, 0, 0],
                             [0, zy, 0],
                             [0, 0, 1]])
@@ -152,10 +154,11 @@ def random_zoom(x, zoom_range, row_axis=1, col_axis=2, channel_axis=0,
     return x
 
 
-def random_channel_shift(x, intensity, channel_axis=0):
+def random_channel_shift(x, intensity, channel_axis=0, known_intensity=None):
     x = np.rollaxis(x, channel_axis, 0)
+    known_intensity = np.random.uniform(-intensity, intensity) if known_intensity is None else known_intensity
     min_x, max_x = np.min(x), np.max(x)
-    channel_images = [np.clip(x_channel + np.random.uniform(-intensity, intensity), min_x, max_x)
+    channel_images = [np.clip(x_channel + known_intensity, min_x, max_x)
                       for x_channel in x]
     x = np.stack(channel_images, axis=0)
     x = np.rollaxis(x, 0, channel_axis + 1)
@@ -169,3 +172,17 @@ def transform_matrix_offset_center(matrix, x, y):
     reset_matrix = np.array([[1, 0, -o_x], [0, 1, -o_y], [0, 0, 1]])
     transform_matrix = np.dot(np.dot(offset_matrix, matrix), reset_matrix)
     return transform_matrix
+
+
+def flip_horizontal(x, value, col_axis=2):
+    if value < 0.5:
+        return flip_axis(x, col_axis)
+    else:
+        return x
+
+
+def flip_vertical(x, value, row_axis=1):
+    if value < 0.5:
+        return flip_axis(x, row_axis)
+    else:
+        return x

@@ -3,7 +3,8 @@ import numpy as np
 from keras.utils import Sequence
 
 from transform.utils import apply_fun, get_batch_shape
-from transform.utils.transformations import random_rotation, random_shift
+from transform.utils.transformations import (random_rotation, random_shift, random_zoom, random_channel_shift,
+                                             random_shear, flip_horizontal, flip_vertical)
 
 
 class BaseSequenceTransformer(Sequence):
@@ -39,10 +40,12 @@ class BaseSequenceTransformer(Sequence):
             self.row_axis = 1
             self.col_axis = 2
 
+        self.common_args = {'row_axis': self.row_axis, 'col_axis': self.col_axis,
+                            'channel_axis': self.channel_axis - 1}
+
     def apply_transformation(self, x_, transformation, args):
         return np.asarray(
-            list(map(lambda args: transformation(args[0], row_axis=self.row_axis, col_axis=self.col_axis,
-                                                 channel_axis=self.channel_axis - 1, **args[1]),
+            list(map(lambda args: transformation(args[0], **args[1]),
                      zip(x_, args))))
 
     def get_args(self):
@@ -60,6 +63,8 @@ class BaseSequenceTransformer(Sequence):
             self.batch_size = get_batch_shape(batch)[0]
 
         args = self.get_args()
+        for arg in args:
+            arg.update(self.common_args)
 
         return apply_fun(batch, self.apply_transformation, self.mask, transformation=self.transformation, args=args)
 
@@ -101,6 +106,97 @@ class RandomShiftTransformer(BaseSequenceTransformer):
         self.transformation = random_shift
 
     def get_args(self):
-        tx = np.random.uniform(-self.hrg, self.hrg)
-        ty = np.random.uniform(-self.wrg, self.wrg)
-        return [{'tx': tx, 'ty': ty, 'wrg': self.wrg, 'hrg': self.hrg} for _ in range(self.batch_size)]
+        return [{'tx': np.random.uniform(-self.hrg, self.hrg), 'ty': np.random.uniform(-self.wrg, self.wrg),
+                 'wrg': self.wrg, 'hrg': self.hrg} for _ in range(self.batch_size)]
+
+
+class RandomZoomTransformer(BaseSequenceTransformer):
+    """Transformer to do random zoom.
+
+    # Arguments
+        sequence: Sequence object to iterate over.
+        zoom_range: Tuple of floats; zoom range for width and height.
+    """
+
+    def __init__(self, sequence, zoom_range, mask=(True, False)):
+        super().__init__(sequence, mask=mask)
+        self.zoom_range = zoom_range
+        self.transformation = random_zoom
+
+    def get_args(self):
+        if self.zoom_range[0] == 1 and self.zoom_range[1] == 1:
+            dt = [(1, 1) for _ in range(self.batch_size)]
+        else:
+            dt = [np.random.uniform(self.zoom_range[0], self.zoom_range[1], 2) for _ in range(self.batch_size)]
+        return [{'z_known': d, 'zoom_range': self.zoom_range} for d in dt]
+
+
+class RandomChannelShiftTransformer(BaseSequenceTransformer):
+    """Transformer to do random zoom.
+
+    # Arguments
+        sequence: Sequence object to iterate over.
+        intensity: float, intensity range
+    """
+
+    def __init__(self, sequence, intensity, mask=(True, False)):
+        super().__init__(sequence, mask=mask)
+        self.intensity = intensity
+        self.transformation = random_channel_shift
+        self.common_args = {'channel_axis': self.channel_axis - 1}
+
+    def get_args(self):
+        return [{'known_intensity': np.random.uniform(-self.intensity, self.intensity), 'intensity': self.intensity} for
+                _ in range(self.batch_size)]
+
+
+class RandomShearTransformer(BaseSequenceTransformer):
+    """Transformer to do random shear.
+
+    # Arguments
+        sequence: Sequence object to iterate over.
+        zoom_range: Tuple of floats; zoom range for width and height.
+    """
+
+    def __init__(self, sequence, intensity, mask=(True, False)):
+        super().__init__(sequence, mask=mask)
+        self.intensity = intensity
+        self.transformation = random_shear
+
+    def get_args(self):
+        return [{'known_intensity': np.random.uniform(-self.intensity, self.intensity), 'intensity': self.intensity} for
+                _ in range(self.batch_size)]
+
+
+class RandomHorizontalFlipTransformer(BaseSequenceTransformer):
+    """Transformer to do random horizontal flip.
+
+    # Arguments
+        sequence: Sequence object to iterate over
+    """
+
+    def __init__(self, sequence, mask=(True, False)):
+        super().__init__(sequence, mask=mask)
+        self.transformation = flip_horizontal
+        self.common_args = {'col_axis': self.col_axis}
+
+    def get_args(self):
+        return [{'value': np.random.random()} for
+                _ in range(self.batch_size)]
+
+
+class RandomVerticalFlipTransformer(BaseSequenceTransformer):
+    """Transformer to do random vertical flip.
+
+    # Arguments
+        sequence: Sequence object to iterate over
+    """
+
+    def __init__(self, sequence, mask=(True, False)):
+        super().__init__(sequence, mask=mask)
+        self.transformation = flip_vertical
+        self.common_args = {'row_axis': self.row_axis}
+
+    def get_args(self):
+        return [{'value': np.random.random()} for
+                _ in range(self.batch_size)]
