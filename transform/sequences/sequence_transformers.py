@@ -89,16 +89,19 @@ class RandomRotationTransformer(BaseSequenceTransformer):
 
     # Arguments
         rg: Range of rotation
+        fill_mode:
     """
 
-    def __init__(self, rg):
+    def __init__(self, rg, fill_mode='nearest'):
         super().__init__()
         self.rg = rg
         self.transformation = random_rotation
+        self.fill_mode = fill_mode
 
     def get_args(self):
         return [{'rg': self.rg,
-                 'theta': np.pi / 180 * np.random.uniform(-self.rg, self.rg)} for _ in range(self.batch_size)]
+                 'theta': np.pi / 180 * np.random.uniform(-self.rg, self.rg),
+                 'fill_mode': self.fill_mode} for _ in range(self.batch_size)]
 
 
 class RandomShiftTransformer(BaseSequenceTransformer):
