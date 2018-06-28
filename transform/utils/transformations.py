@@ -8,7 +8,8 @@ from __future__ import absolute_import
 from __future__ import print_function
 
 import numpy as np
-from keras.preprocessing.image import apply_transform, flip_axis
+from keras.preprocessing.image import apply_affine_transform
+from keras_preprocessing.image import flip_axis
 
 try:
     from PIL import Image as pil_image
@@ -37,13 +38,7 @@ def random_rotation(x, rg, row_axis=1, col_axis=2, channel_axis=0,
         Rotated Numpy image tensor.
     """
     theta = np.pi / 180 * np.random.uniform(-rg, rg) if theta is None else theta
-    rotation_matrix = np.array([[np.cos(theta), -np.sin(theta), 0],
-                                [np.sin(theta), np.cos(theta), 0],
-                                [0, 0, 1]])
-
-    h, w = x.shape[row_axis], x.shape[col_axis]
-    transform_matrix = transform_matrix_offset_center(rotation_matrix, h, w)
-    x = apply_transform(x, transform_matrix, channel_axis, fill_mode, cval)
+    x = apply_affine_transform(x, theta=theta, channel_axis=channel_axis, fill_mode=fill_mode, cval=cval, row_axis=row_axis, col_axis=col_axis)
     return x
 
 
@@ -75,13 +70,7 @@ def random_shift(x, wrg, hrg, row_axis=1, col_axis=2, channel_axis=0,
 
     tx *= h
     ty *= w
-
-    translation_matrix = np.array([[1, 0, tx],
-                                   [0, 1, ty],
-                                   [0, 0, 1]])
-
-    transform_matrix = translation_matrix  # no need to do offset
-    x = apply_transform(x, transform_matrix, channel_axis, fill_mode, cval)
+    x = apply_affine_transform(x, tx=tx, ty=ty, channel_axis=channel_axis, fill_mode=fill_mode, cval=cval)
     return x
 
 
@@ -106,13 +95,7 @@ def random_shear(x, intensity, row_axis=1, col_axis=2, channel_axis=0,
         Sheared Numpy image tensor.
     """
     shear = np.random.uniform(-intensity, intensity) if known_intensity is None else known_intensity
-    shear_matrix = np.array([[1, -np.sin(shear), 0],
-                             [0, np.cos(shear), 0],
-                             [0, 0, 1]])
-
-    h, w = x.shape[row_axis], x.shape[col_axis]
-    transform_matrix = transform_matrix_offset_center(shear_matrix, h, w)
-    x = apply_transform(x, transform_matrix, channel_axis, fill_mode, cval)
+    x = apply_affine_transform(x, shear=shear, channel_axis=channel_axis, fill_mode=fill_mode, cval=cval, row_axis=row_axis, col_axis=col_axis)
     return x
 
 
@@ -149,13 +132,7 @@ def random_zoom(x, zoom_range, row_axis=1, col_axis=2, channel_axis=0,
             zx, zy = np.random.uniform(zoom_range[0], zoom_range[1], 2)
     else:
         zx, zy = z_known
-    zoom_matrix = np.array([[zx, 0, 0],
-                            [0, zy, 0],
-                            [0, 0, 1]])
-
-    h, w = x.shape[row_axis], x.shape[col_axis]
-    transform_matrix = transform_matrix_offset_center(zoom_matrix, h, w)
-    x = apply_transform(x, transform_matrix, channel_axis, fill_mode, cval)
+    x = apply_affine_transform(x, zx=zx, zy=zy, channel_axis=channel_axis, fill_mode=fill_mode, cval=cval, row_axis=row_axis, col_axis=col_axis)
     return x
 
 

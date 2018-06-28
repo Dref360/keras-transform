@@ -1,6 +1,8 @@
 # keras-transform
 Library for data augmentation
 
+*ANNOUNCEMENT* : I won't really work on this library anymore, the recent changes made with Keras 2.2.0 made this library obselete. Please see my blog post : https://dref360.github.io/deterministic-da/
+
 This library provides a data augmentation pipeline for `Sequence` objects.
 
 **Keras-transform** allows the user to specify a mask to do data augmentation in a flexible way. This is useful in many tasks like segmentation where we want the ground truth to be augmented.

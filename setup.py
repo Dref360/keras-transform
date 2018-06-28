@@ -8,7 +8,7 @@ setup(name='keras-transform',
       author_email='frederic.branchaud-charron@usherbrooke.ca',
       url='https://github.com/Dref360/keras-transform',
       license='MIT',
-      install_requires=['numpy', 'theano', 'keras>=2.0.5'],
+      install_requires=['numpy', 'theano', 'keras>=2.2.0'],
       extras_require={
           'tests': ['pytest',
                     'pytest-pep8',
