@@ -33,7 +33,7 @@ jobs:
             python3 -m venv venv
             . venv/bin/activate
             pip3 install numpy theano tensorflow
-            python3 setup.py install
+            pip3 install keras_preprocessing keras --no-deps
             pip3 install -e .[tests]
 
       - save_cache:
